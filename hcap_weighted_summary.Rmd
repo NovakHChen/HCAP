@@ -1,6 +1,8 @@
 ---
 title: "hcap_weighted_summary"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 date: "2024-09-11"
 ---
 
@@ -39,9 +41,8 @@ summary_data <- data %>%
   select(rage, rfemale, reduc, iage, ifemale, ieduc, coresi, 
                  ispouse, ichild, iothfam, inonfam, hcap16wgtr, secu, stratum)
   
-# filtered_data <- summary_data %>%
-#   group_by(stratum) %>%
-#   filter(n_distinct(secu) > 1)
+options(survey.lonely.psu = "adjust")
+
 
 #create a survey design object 
 svydes <- summary_data %>% 
@@ -67,8 +68,6 @@ create_wtgsumm <- function(vars) {
     ) %>% 
     bold_labels()  # No add_overall() if no grouping
 }
-
-
 ```
 
 ```{r}
