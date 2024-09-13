@@ -1,0 +1,86 @@
+---
+title: "hcap_weighted_summary"
+output: html_document
+date: "2024-09-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Load libraries
+if (!require("pacman")){
+  install.packages("pacman", repos='http://cran.us.r-project.org')
+}
+
+p_load("janitor", "broom", "tidyverse", "magrittr", "plyr", "haven", "glue", 
+       "survey", "labelled", "gtsummary", "srvyr","gt")
+```
+
+```{r}
+#load data and filter for variables
+data <- read.csv('/Users/novak/ZhangYS Dropbox/Shared/HCAP/python file/hrs-hcap-full.csv')
+data <- data %>% 
+  select(hhid, pn, id_hrs, hrs, mex, wgt,
+         binf1csidmental, binf1csidmemory, binf1csidput, binf1csidkept,
+         binf1csidfrdname, binf1csidfamname, binf1csidconvers, binf1csidwordfind,
+         binf1csidwordwrg, binf1csidpast, binf1csidlastsee, binf1csidlastday,
+         binf1csidorient, binf1csidlostout, binf1csidlostin, binf1chores,
+         binf1hobby, binf1money, binf1change, binf1bl2feed, bcsid,
+         fgcp, fmem, fexf, flang, forient, mmse,
+         rage, rfemale, reduc, iage, ifemale, ieduc,
+         relation, ispouse, ichild, iothfam, inonfam, coresi, hcap16wgtr, secu, stratum)
+```
+
+```{r}
+
+summary_data <- data %>% 
+  select(rage, rfemale, reduc, iage, ifemale, ieduc, coresi, 
+                 ispouse, ichild, iothfam, inonfam, hcap16wgtr, secu, stratum)
+  
+# filtered_data <- summary_data %>%
+#   group_by(stratum) %>%
+#   filter(n_distinct(secu) > 1)
+
+#create a survey design object 
+svydes <- summary_data %>% 
+  as_survey_design(
+    weights = hcap16wgtr,
+    strata = stratum,
+    ids = secu,
+    nest = TRUE
+    )
+```
+
+```{r}
+create_wtgsumm <- function(vars) {
+  svydes %>% 
+    tbl_svysummary(
+      include = all_of(vars),  
+      type = list(all_continuous() ~ "continuous2"),
+      statistic = list(
+        all_continuous() ~ c("{mean}", "({sd})", "{median}", "({p25}, {p75})"),
+        all_categorical() ~ "{n} ({p}%)"
+      ), 
+      digits = list(all_continuous() ~ 2, all_categorical() ~ c(0, 1))
+    ) %>% 
+    bold_labels()  # No add_overall() if no grouping
+}
+
+
+```
+
+```{r}
+create_wtgsumm(c("rage", "rfemale", "reduc", "iage", "ifemale", "ieduc", "coresi", 
+                 "ispouse", "ichild", "iothfam", "inonfam"))
+```
+
+
+
+
+
+
+
+
+
