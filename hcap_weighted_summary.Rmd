@@ -1,8 +1,6 @@
 ---
 title: "hcap_weighted_summary"
-output:
-  html_document: default
-  pdf_document: default
+output: rmarkdown::github_document
 date: "2024-09-11"
 ---
 
